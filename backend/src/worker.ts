@@ -1,6 +1,6 @@
 import { Worker, Job } from 'bullmq';
 import { EMAIL_QUEUE_NAME, EmailJobData } from './queue';
-import { redisHost, redisPort, redisConnection } from './redis';
+import { redisConnectionOptions, redisConnection } from './redis';
 import prisma from './db';
 import { sendEmailViaEthereal } from './ethereal';
 import { indexEmailJob } from './elasticsearch';
@@ -174,10 +174,7 @@ export const emailWorker = new Worker<EmailJobData>(
     }
   },
   {
-    connection: {
-      host: redisHost,
-      port: redisPort,
-    },
+    connection: redisConnectionOptions,
     concurrency: concurrency,
   }
 );

@@ -120,6 +120,7 @@ SLACK_REDIRECT_URI	http://localhost:5000/api/slack/oauth/callback	Register this 
 FRONTEND_URL	http://localhost:5173	Frontend URL used after Slack OAuth
 REDIS_HOST	localhost	Redis server hostname
 REDIS_PORT	6379	Redis port
+REDIS_URL	Unset locally; set the hosted Redis connection URL on Render	When set, overrides REDIS_HOST/REDIS_PORT and supports `redis://` or TLS `rediss://` URLs
 ELASTICSEARCH_NODE	http://localhost:9200	Elasticsearch endpoint
 WORKER_CONCURRENCY	5	Concurrency level of BullMQ workers
 DEFAULT_HOURLY_LIMIT	100	Default hourly limit per sender
