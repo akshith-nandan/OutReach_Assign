@@ -127,7 +127,7 @@ DEFAULT_HOURLY_LIMIT	100	Default hourly limit per sender
 DEFAULT_DELAY_SECONDS	2	Minimum inter-email send delay in seconds
 Frontend (frontend/.env)
 Variable	Default Value	Description
-VITE_API_URL	http://localhost:5000/api	Backend API URL
+VITE_API_URL	https://outreach-assign.onrender.com/api	Backend API URL (override for local development with http://localhost:5000/api)
 VITE_GOOGLE_CLIENT_ID	Google OAuth Web client ID	Register http://localhost:5173 as an authorized JavaScript origin
 VITE_DEFAULT_HOURLY_LIMIT	100	Default per-campaign sender limit
 VITE_DEFAULT_DELAY_SECONDS	2	Default per-email minimum gap
