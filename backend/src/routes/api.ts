@@ -18,6 +18,14 @@ import { emailQueue } from '../queue';
 import { requireAuth } from '../auth';
 const router = Router();
 // Auth routes
+router.get('/auth/google/config', (_req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return res.status(503).json({ error: 'Google sign-in is not configured on the backend.' });
+  }
+  res.set('Cache-Control', 'public, max-age=300');
+  return res.json({ clientId });
+});
 router.post('/auth/google', loginOrRegisterGoogleUser);
 router.get('/slack/oauth/callback', slackOAuthCallback);
 router.use(requireAuth);

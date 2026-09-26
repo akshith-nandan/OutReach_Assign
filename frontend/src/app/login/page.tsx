@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Sparkles, ShieldCheck, Zap, AlertCircle } from 'lucide-react';
+import api from '../../lib/api';
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -32,12 +33,8 @@ export default function LoginPage() {
   loginRef.current = loginWithGoogle;
 
   useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      setError('Google sign-in is not configured. Set VITE_GOOGLE_CLIENT_ID.');
-      return;
-    }
-    const renderGoogleButton = () => {
+    let isMounted = true;
+    const renderGoogleButton = (clientId: string) => {
       if (!window.google || !googleButtonRef.current) return;
       window.google.accounts.id.initialize({
         client_id: clientId,
@@ -62,20 +59,47 @@ export default function LoginPage() {
         text: 'continue_with',
       });
     };
-    const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://accounts.google.com/gsi/client"]');
-    if (window.google) {
-      renderGoogleButton();
-    } else if (existingScript) {
-      existingScript.addEventListener('load', renderGoogleButton, { once: true });
-    } else {
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = renderGoogleButton;
-      script.onerror = () => setError('Could not load Google sign-in. Check your network connection.');
-      document.head.appendChild(script);
-    }
+
+    const initializeGoogle = async () => {
+      try {
+        let clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+        if (!clientId) {
+          const response = await api.get<{ clientId: string }>('/auth/google/config');
+          clientId = response.data.clientId;
+        }
+        if (!isMounted) return;
+
+        const existingScript = document.querySelector<HTMLScriptElement>(
+          'script[src="https://accounts.google.com/gsi/client"]'
+        );
+        if (window.google) {
+          renderGoogleButton(clientId);
+        } else if (existingScript) {
+          existingScript.addEventListener('load', () => renderGoogleButton(clientId!), { once: true });
+        } else {
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.defer = true;
+          script.onload = () => renderGoogleButton(clientId!);
+          script.onerror = () => {
+            if (isMounted) setError('Could not load Google sign-in. Check your network connection.');
+          };
+          document.head.appendChild(script);
+        }
+      } catch (configError: any) {
+        if (!isMounted) return;
+        setError(
+          configError.response?.data?.error ||
+          'Could not load Google sign-in configuration. Check the backend URL and GOOGLE_CLIENT_ID on Render.'
+        );
+      }
+    };
+
+    void initializeGoogle();
+    return () => {
+      isMounted = false;
+    };
   }, []);
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
